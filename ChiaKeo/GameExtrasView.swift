@@ -181,14 +181,23 @@ struct GameOptionsView: View {
                     if let link = detail.shareLink {
                         Toggle("Bật link xem", isOn: .constant(link.enabled))
                             .disabled(true)
-                        Button("Copy link xem") {
+                        Button {
                             UIPasteboard.general.string = "\(ApiClient.origin)/share/\(link.token)"
+                        } label: {
+                            Label("Copy link xem", systemImage: "doc.on.doc")
                         }
-                        Button(link.enabled ? "Tắt link" : "Bật link") {
+                        Button {
                             Task { await setLink(enabled: !link.enabled) }
+                        } label: {
+                            Label(link.enabled ? "Tắt link" : "Bật link",
+                                  systemImage: link.enabled ? "link.badge.plus" : "link")
                         }
                     } else {
-                        Button("Tạo link xem") { Task { await rotateLink() } }
+                        Button {
+                            Task { await rotateLink() }
+                        } label: {
+                            Label("Tạo link xem", systemImage: "link")
+                        }
                     }
 
                     ForEach(detail.collaborators) { person in
@@ -212,17 +221,28 @@ struct GameOptionsView: View {
                 }
 
                 Section("Báo cáo") {
-                    Button("Copy báo cáo") { copyReport(detail) }
-                    Button("Gửi email tổng kết") { Task { await emailSummary() } }
+                    Button { copyReport(detail) } label: {
+                        Label("Copy báo cáo", systemImage: "doc.on.clipboard")
+                    }
+                    Button { Task { await emailSummary() } } label: {
+                        Label("Gửi email tổng kết", systemImage: "envelope")
+                    }
                 }
 
                 Section {
-                    Button(detail.isClosed ? "Mở lại cuộc chia" : "Đóng cuộc chia") {
+                    Button {
                         Task { await toggleClosed(detail) }
+                    } label: {
+                        Label(detail.isClosed ? "Mở lại cuộc chia" : "Đóng cuộc chia",
+                              systemImage: detail.isClosed ? "lock.open" : "lock")
                     }
-                    Button("Nhân bản cuộc chia") { Task { await duplicate() } }
+                    Button { Task { await duplicate() } } label: {
+                        Label("Nhân bản cuộc chia", systemImage: "plus.square.on.square")
+                    }
                     if detail.isOwner {
-                        Button("Xoá cuộc chia", role: .destructive) { confirmDelete = true }
+                        Button(role: .destructive) { confirmDelete = true } label: {
+                            Label("Xoá cuộc chia", systemImage: "trash")
+                        }
                     }
                 }
             }

@@ -188,11 +188,15 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    NavigationLink("Token MCP", value: Route.mcpTokens)
+                    NavigationLink(value: Route.mcpTokens) {
+                        Label("Token MCP", systemImage: "key.horizontal")
+                    }
                 }
 
                 Section {
-                    Button("Đăng xuất", role: .destructive) { auth.signOut() }
+                    Button(role: .destructive) { auth.signOut() } label: {
+                        Label("Đăng xuất", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
                 }
             }
             .navigationTitle("Cài đặt")

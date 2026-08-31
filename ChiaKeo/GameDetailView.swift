@@ -56,9 +56,15 @@ struct GameDetailView: View {
                         Button("Thêm người", systemImage: "person.badge.plus") { addingPerson = true }
                         Button("Ghi chuyển tiền", systemImage: "arrow.left.arrow.right") { transferring = true }
                     }
-                    NavigationLink("Ảnh", value: Route.gamePhotos(gameId))
-                    NavigationLink("Lịch sử", value: Route.gameHistory(gameId))
-                    NavigationLink("Tùy chọn cuộc chơi", value: Route.gameOptions(gameId))
+                    NavigationLink(value: Route.gamePhotos(gameId)) {
+                        Label("Ảnh", systemImage: "photo.on.rectangle")
+                    }
+                    NavigationLink(value: Route.gameHistory(gameId)) {
+                        Label("Lịch sử", systemImage: "clock.arrow.circlepath")
+                    }
+                    NavigationLink(value: Route.gameOptions(gameId)) {
+                        Label("Tùy chọn cuộc chơi", systemImage: "slider.horizontal.3")
+                    }
                 } label: {
                     Label("Thêm", systemImage: "ellipsis.circle")
                 }

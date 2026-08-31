@@ -47,7 +47,9 @@ struct HomeView: View {
                         ForEach(cross.settlements.prefix(5)) { row in
                             TransferRow(from: row.from, to: row.to, amount: row.amount)
                         }
-                        NavigationLink("Xem tất tán chi tiết", value: Route.crossBalances)
+                        NavigationLink(value: Route.crossBalances) {
+                            Label("Xem tất toán chi tiết", systemImage: "arrow.left.arrow.right")
+                        }
                             .font(.footnote)
                     } header: {
                         Text("Cần tất toán")
@@ -57,9 +59,15 @@ struct HomeView: View {
                 }
 
                 Section {
-                    NavigationLink("Sổ liên hệ", value: Route.contacts)
-                    NavigationLink("Cuộc đã đóng", value: Route.closedGames)
-                    NavigationLink("Thùng rác", value: Route.trash)
+                    NavigationLink(value: Route.contacts) {
+                        Label("Sổ liên hệ", systemImage: "person.text.rectangle")
+                    }
+                    NavigationLink(value: Route.closedGames) {
+                        Label("Cuộc đã đóng", systemImage: "lock")
+                    }
+                    NavigationLink(value: Route.trash) {
+                        Label("Thùng rác", systemImage: "trash")
+                    }
                 }
             }
             .navigationTitle("Cuộc chia")
