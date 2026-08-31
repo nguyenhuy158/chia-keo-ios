@@ -109,3 +109,55 @@ final class SummaryTextTests: XCTestCase {
         XCTAssertEqual(pickHostParticipantId([]), "")
     }
 }
+
+@MainActor
+final class SummaryImageTests: XCTestCase {
+    private func detail() throws -> ApiGameDetail {
+        try JSONDecoder().decode(ApiGameDetail.self, from: Data("""
+        {"id":"g","code":"ABC","name":"Cầu tối","settlementMode":"p2p","settlementHostId":"",
+         "closedAt":null,"closeMode":"manual",
+         "participants":[{"id":"p1","name":"Huy","bankId":"","accountNo":"","accountName":""}],
+         "expenses":[{"id":"e1","kind":"expense","category":"","title":"Cầu","amount":120000,
+                      "note":"","payerParticipantId":"p1","splitMode":"equal",
+                      "splitParticipantIds":["p1"],"splits":[{"participantId":"p1","amount":120000}],
+                      "createdAt":"2025-08-12T12:00:00Z"}],
+         "summary":{"totalExpense":120000,
+                    "balances":[{"participantId":"p1","paid":120000,"owed":120000,"balance":0}],
+                    "settlements":[]},
+         "shareLink":null,"isOwner":true,"collaborators":[]}
+        """.utf8))
+    }
+
+    func testBackgroundLookupFallsBackToDefault() {
+        XCTAssertEqual(summaryBackgrounds.count, 7)
+        XCTAssertEqual(summaryBackground("dem").label, "Nền đêm")
+        XCTAssertEqual(summaryBackground("khong-co").id, summaryBackgrounds[0].id)
+        XCTAssertEqual(summaryBackground(nil).id, "cau-long")
+    }
+
+    func testStoreRejectsUnknownId() {
+        UserDefaults.standard.removeObject(forKey: SummaryBackgroundStore.key)
+        XCTAssertEqual(SummaryBackgroundStore.id, "cau-long")
+        SummaryBackgroundStore.id = "dem"
+        XCTAssertEqual(SummaryBackgroundStore.id, "dem")
+        UserDefaults.standard.set("rac", forKey: SummaryBackgroundStore.key)
+        XCTAssertEqual(SummaryBackgroundStore.id, "cau-long")   // id la thi ve nen mac dinh
+        UserDefaults.standard.removeObject(forKey: SummaryBackgroundStore.key)
+    }
+
+    /// Anh phai ra duoc voi moi nen — nen emoji dung Canvas nen de vo rieng.
+    func testRendersEveryBackground() throws {
+        let detail = try detail()
+        for background in summaryBackgrounds {
+            let image = renderSummaryImage(detail, background: background)
+            XCTAssertNotNil(image, background.id)
+            XCTAssertGreaterThan(image?.size.width ?? 0, 700, background.id)
+            XCTAssertGreaterThan(image?.size.height ?? 0, 100, background.id)
+        }
+    }
+
+    func testFileName() throws {
+        XCTAssertEqual(summaryImageFileName(try detail(), variant: .compact), "chia-keo-ABC.png")
+        XCTAssertEqual(summaryImageFileName(try detail(), variant: .detailed), "chia-keo-ABC-chi-tiet.png")
+    }
+}

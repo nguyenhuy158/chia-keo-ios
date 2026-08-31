@@ -350,9 +350,12 @@ struct ContactPickerView: View {
 
 /// Ban chieu cua src/components/CopyMenu.tsx. Bo phan anh PNG: iOS chua co
 /// renderer, va text la thu thuc su duoc dan vao Zalo.
+@MainActor
 struct CopyMenu: View {
     let detail: ApiGameDetail
     let notify: (String) -> Void
+
+    @AppStorage(SummaryBackgroundStore.key) private var backgroundId = summaryBackgrounds[0].id
 
     private var shareUrl: String? {
         guard let link = detail.shareLink, link.enabled else { return nil }
@@ -361,6 +364,10 @@ struct CopyMenu: View {
 
     var body: some View {
         Menu {
+            Picker("Nền ảnh", selection: $backgroundId) {
+                ForEach(summaryBackgrounds) { Text($0.label).tag($0.id) }
+            }
+
             Button {
                 copy(buildSummaryText(detail, shareUrl: shareUrl), "Đã copy tổng kết")
             } label: {
@@ -372,10 +379,17 @@ struct CopyMenu: View {
             } label: {
                 Label("Copy tổng kết chi tiết", systemImage: "arrow.left.arrow.right")
             }
+            Button { copyImage(.compact) } label: {
+                Label("Copy ảnh", systemImage: "photo")
+            }
+            Button { copyImage(.detailed) } label: {
+                Label("Copy ảnh chi tiết", systemImage: "photo.on.rectangle")
+            }
+            Button { saveImage() } label: {
+                Label("Lưu ảnh về máy", systemImage: "square.and.arrow.down")
+            }
             if let shareUrl {
-                Button {
-                    copy(shareUrl, "Đã copy link")
-                } label: {
+                Button { copy(shareUrl, "Đã copy link") } label: {
                     Label("Copy link xem", systemImage: "link")
                 }
             }
@@ -387,6 +401,30 @@ struct CopyMenu: View {
     private func copy(_ text: String, _ message: String) {
         UIPasteboard.general.string = text
         notify(message)
+    }
+
+    private func image(_ variant: SummaryVariant) -> UIImage? {
+        renderSummaryImage(detail, variant: variant, shareUrl: shareUrl,
+                           background: summaryBackground(backgroundId))
+    }
+
+    private func copyImage(_ variant: SummaryVariant) {
+        guard let image = image(variant) else {
+            notify("Không tạo được ảnh tổng kết")
+            return
+        }
+        UIPasteboard.general.image = image
+        notify(variant == .detailed ? "Đã copy ảnh chi tiết" : "Đã copy ảnh tổng kết")
+    }
+
+    private func saveImage() {
+        guard let image = image(.compact) else {
+            notify("Không tạo được ảnh tổng kết")
+            return
+        }
+        // Ghi thang vao Anh; iOS tu xin quyen lan dau.
+        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+        notify("Đã lưu ảnh vào Ảnh")
     }
 }
 

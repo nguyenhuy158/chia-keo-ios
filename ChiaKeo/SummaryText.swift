@@ -39,9 +39,23 @@ func resolveHostParticipantId(_ balances: [BalanceRow], mode: String, hostId: St
     return pickHostParticipantId(balances)
 }
 
-func buildSummaryText(_ detail: ApiGameDetail,
-                      variant: SummaryVariant = .compact,
-                      shareUrl: String? = nil) -> String {
+/// Mot phan cua ban tom tat, de text va anh dung chung noi dung.
+struct SummaryBlock {
+    let heading: String
+    let lines: [String]
+}
+
+struct SummaryDoc {
+    let title: String
+    let subtitle: String
+    let sections: [SummaryBlock]
+    let footer: String?
+}
+
+/// Text va anh cung dung mot noi dung: sua o day la sua ca hai.
+func buildSummaryDoc(_ detail: ApiGameDetail,
+                     variant: SummaryVariant = .compact,
+                     shareUrl: String? = nil) -> SummaryDoc {
     let detailed = variant == .detailed
     // API tra khoan moi nhat truoc; doc bang chu thi de theo tu khoan cu nhat.
     // Khoan tra no da vao balance nen khong liet ke chung voi cac khoan chi.
@@ -49,12 +63,13 @@ func buildSummaryText(_ detail: ApiGameDetail,
     let balanceById = Dictionary(uniqueKeysWithValues: detail.summary.balances.map { ($0.participantId, $0) })
     func name(_ id: String) -> String { detail.participants.first { $0.id == id }?.name ?? unknownName }
 
-    var blocks = ["\(detail.name) · \(detail.code)"]
+    var sections: [SummaryBlock] = []
 
     // MARK: Cac khoan chi
-    var chi = [expenses.isEmpty
+    let chiHeading = expenses.isEmpty
         ? "CÁC KHOẢN CHI"
-        : "CÁC KHOẢN CHI (\(expenses.count) khoản · tổng \(formatShortMoney(detail.summary.totalExpense)))"]
+        : "CÁC KHOẢN CHI (\(expenses.count) khoản · tổng \(formatShortMoney(detail.summary.totalExpense)))"
+    var chi: [String] = []
     if expenses.isEmpty {
         chi.append("Chưa có khoản chi nào.")
     } else {
@@ -69,11 +84,11 @@ func buildSummaryText(_ detail: ApiGameDetail,
             chi.append(line)
         }
     }
-    blocks.append(chi.joined(separator: "\n"))
+    sections.append(SummaryBlock(heading: chiHeading, lines: chi))
 
     // MARK: Tung nguoi
     if !detail.participants.isEmpty {
-        var nguoi = [detailed ? "TỪNG NGƯỜI (phần phải chịu)" : "TỪNG NGƯỜI"]
+        var nguoi: [String] = []
         for participant in detail.participants {
             let terms = expenses.compactMap { expense -> String? in
                 guard let share = (expense.splits ?? []).first(where: { $0.participantId == participant.id }),
@@ -87,7 +102,8 @@ func buildSummaryText(_ detail: ApiGameDetail,
             if detailed, let state = describeSettleState(row) { line += " · \(state)" }
             nguoi.append(line)
         }
-        blocks.append(nguoi.joined(separator: "\n"))
+        sections.append(SummaryBlock(heading: detailed ? "TỪNG NGƯỜI (phần phải chịu)" : "TỪNG NGƯỜI",
+                                      lines: nguoi))
     }
 
     // MARK: Chuyen tien
@@ -96,18 +112,26 @@ func buildSummaryText(_ detail: ApiGameDetail,
         let hostId = resolveHostParticipantId(detail.summary.balances, mode: mode, hostId: detail.settlementHostId)
         let transfers = detail.summary.balances.filter { $0.participantId != hostId && $0.balance != 0 }
         if !hostId.isEmpty, !transfers.isEmpty {
-            blocks.append(hostBlock(transfers, hostName: name(hostId), hostId: hostId,
-                                    balances: detail.summary.balances, detailed: detailed, name: name))
+            sections.append(hostSection(transfers, hostName: name(hostId), hostId: hostId,
+                                        balances: detail.summary.balances, detailed: detailed, name: name))
         }
     } else if mode != "off", !detail.summary.settlements.isEmpty {
-        let lines = detail.summary.settlements.map {
+        sections.append(SummaryBlock(heading: "CẦN CHUYỂN", lines: detail.summary.settlements.map {
             "- \(name($0.fromParticipantId)) → \(name($0.toParticipantId)): \(formatShortMoney($0.amount))"
-        }
-        blocks.append((["CẦN CHUYỂN"] + lines).joined(separator: "\n"))
+        }))
     }
 
-    if let shareUrl { blocks.append("Chi tiết: \(shareUrl)") }
+    return SummaryDoc(title: detail.name, subtitle: detail.code, sections: sections,
+                      footer: shareUrl.map { "Chi tiết: \($0)" })
+}
 
+func buildSummaryText(_ detail: ApiGameDetail,
+                      variant: SummaryVariant = .compact,
+                      shareUrl: String? = nil) -> String {
+    let doc = buildSummaryDoc(detail, variant: variant, shareUrl: shareUrl)
+    var blocks = ["\(doc.title) · \(doc.subtitle)"]
+    blocks += doc.sections.map { ([$0.heading] + $0.lines).joined(separator: "\n") }
+    if let footer = doc.footer { blocks.append(footer) }
     return blocks.joined(separator: "\n\n")
 }
 
@@ -137,9 +161,9 @@ private func describeSettleState(_ row: BalanceRow?) -> String? {
     return row.paid > 0 ? "đã ứng \(formatShortMoney(row.paid)) → vừa đủ" : nil
 }
 
-private func hostBlock(_ transfers: [BalanceRow], hostName: String, hostId: String,
-                       balances: [BalanceRow], detailed: Bool,
-                       name: (String) -> String) -> String {
+private func hostSection(_ transfers: [BalanceRow], hostName: String, hostId: String,
+                         balances: [BalanceRow], detailed: Bool,
+                         name: (String) -> String) -> SummaryBlock {
     guard detailed else {
         // Ban goc: mot danh sach phang, giu dung thu tu nguoi tham gia.
         let lines = transfers.map { row in
@@ -147,14 +171,14 @@ private func hostBlock(_ transfers: [BalanceRow], hostName: String, hostId: Stri
                 ? "- \(name(row.participantId)) → \(hostName): \(formatShortMoney(-row.balance))"
                 : "- \(hostName) → \(name(row.participantId)): \(formatShortMoney(row.balance))"
         }
-        return (["GOM VỀ \(hostName.uppercased())"] + lines).joined(separator: "\n")
+        return SummaryBlock(heading: "GOM VỀ \(hostName.uppercased())", lines: lines)
     }
 
     // Ban chi tiet: tach hai chieu, kem tong tien vao va ly do host tra lai.
     let reason = hostId == pickHostParticipantId(balances)
         ? "\(hostName) ứng nhiều nhất, cả nhóm quét 1 QR"
         : "cả nhóm quét 1 QR"
-    var lines = ["GOM VỀ \(hostName.uppercased()) (\(reason))"]
+    var lines: [String] = []
 
     let incoming = transfers.filter { $0.balance < 0 }
     if !incoming.isEmpty {
@@ -175,5 +199,5 @@ private func hostBlock(_ transfers: [BalanceRow], hostName: String, hostId: Stri
             return "- \(hostName) → \(name(row.participantId)): \(formatShortMoney(row.balance))\(why)"
         }
     }
-    return lines.joined(separator: "\n")
+    return SummaryBlock(heading: "GOM VỀ \(hostName.uppercased()) (\(reason))", lines: lines)
 }
