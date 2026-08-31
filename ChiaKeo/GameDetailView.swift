@@ -436,6 +436,7 @@ private struct ExpensesSection: View {
 
     @EnvironmentObject private var auth: AuthStore
     @State private var error: String?
+    @State private var editing: ApiExpense?
 
     var body: some View {
         Section {
@@ -443,6 +444,10 @@ private struct ExpensesSection: View {
                 Text("Chưa có khoản chi nào.").font(.footnote).foregroundStyle(.secondary)
             }
             ForEach(detail.expenses) { expense in
+                Button {
+                    // Chuyen tien co form rieng; sua o day se bien no thanh khoan chi.
+                    if !detail.isClosed && expense.kind != "transfer" { editing = expense }
+                } label: {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack {
                         Text(categoryEmoji(expense.category))
@@ -457,9 +462,13 @@ private struct ExpensesSection: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .foregroundStyle(.primary)
                 .swipeActions {
                     if !detail.isClosed {
                         Button("Xoá", role: .destructive) { Task { await remove(expense) } }
+                        Button("Sửa") { editing = expense }.tint(.blue)
                     }
                 }
             }
@@ -467,6 +476,9 @@ private struct ExpensesSection: View {
             Text("Tổng chi \(formatVnd(detail.summary.totalExpense))")
         } footer: {
             if let error { Text(error).foregroundStyle(.red) }
+        }
+        .sheet(item: $editing) { expense in
+            AddExpenseView(game: detail, expense: expense) { Task { await reload() } }
         }
     }
 

@@ -273,10 +273,20 @@ final class SmokeRenderTests: XCTestCase {
         {"id":"g1","code":"ABC","name":"Cầu","settlementMode":"p2p","settlementHostId":"",
          "closedAt":null,"closeMode":"manual",
          "participants":[{"id":"p1","name":"Huy","bankId":"TCB","accountNo":"1","accountName":"HUY"}],
-         "expenses":[],"summary":{"totalExpense":0,"balances":[],"settlements":[]},
+         "expenses":[{"id":"e1","kind":"expense","category":"food","title":"Cầu","amount":120000,
+                      "note":"ghi chú","payerParticipantId":"p1","splitMode":"amount",
+                      "splitParticipantIds":["p1"],"splits":[{"participantId":"p1","amount":120000}],
+                      "createdAt":"2025-08-12T12:00:00Z"}],
+         "summary":{"totalExpense":120000,
+                    "balances":[{"participantId":"p1","paid":120000,"owed":120000,"balance":0}],
+                    "settlements":[]},
          "shareLink":null,"isOwner":true,"collaborators":[]}
         """.utf8))
         await render(NavigationStack { AddExpenseView(game: detail, onSaved: {}) }, seconds: 0.2)
+        // Che do sua: dien san, va canh bao khoan dang chia tuy chinh.
+        await render(NavigationStack {
+            AddExpenseView(game: detail, expense: detail.expenses[0], onSaved: {})
+        }, seconds: 0.3)
         await render(NavigationStack {
             PersonFormView(gameId: "g1", participant: detail.participants[0], done: {})
         }, seconds: 0.2)

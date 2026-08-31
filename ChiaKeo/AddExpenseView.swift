@@ -3,6 +3,8 @@ import UIKit
 
 struct AddExpenseView: View {
     let game: ApiGameDetail
+    /// nil la them moi; co gia tri la sua khoan do.
+    var expense: ApiExpense?
     let onSaved: () -> Void
 
     @EnvironmentObject private var auth: AuthStore
@@ -16,6 +18,12 @@ struct AddExpenseView: View {
     @State private var busy = false
     @State private var scanning = false
     @State private var category = ""
+    @State private var note = ""
+
+    private var editing: Bool { expense != nil }
+
+    /// Form nay chi chia deu; khoan dang chia tuy chinh se bi chia lai deu khi luu.
+    private var willResetSplit: Bool { (expense?.splitMode ?? "equal") != "equal" }
 
     private var amount: Int? {
         // Nguoi ta go "125.000" hay "125 000" la binh thuong; loc lay chu so.
@@ -35,6 +43,15 @@ struct AddExpenseView: View {
                     Section { Text(error).foregroundStyle(.red).font(.footnote) }
                 }
 
+                if editing, willResetSplit {
+                    Section {
+                        Text("Khoản này đang chia tùy chỉnh. Lưu ở đây sẽ chia đều lại cho những người được chọn.")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                if !editing {
                 Section {
                     Button {
                         scanning = true
@@ -44,6 +61,7 @@ struct AddExpenseView: View {
                     .disabled(busy)
                 } footer: {
                     Text("Gemini đọc hoá đơn rồi điền sẵn tên, số tiền và người trả.")
+                }
                 }
 
                 Section("Khoản chi") {
@@ -59,6 +77,7 @@ struct AddExpenseView: View {
                     if let amount {
                         Text(formatVnd(amount)).font(.caption).foregroundStyle(.secondary)
                     }
+                    TextField("Ghi chú", text: $note)
                 }
 
                 Section("Ai trả") {
@@ -85,7 +104,7 @@ struct AddExpenseView: View {
                     }
                 }
             }
-            .navigationTitle("Thêm khoản chi")
+            .navigationTitle(editing ? "Sửa khoản chi" : "Thêm khoản chi")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -106,6 +125,14 @@ struct AddExpenseView: View {
                 .ignoresSafeArea()
             }
             .onAppear {
+                if let expense {
+                    if title.isEmpty { title = expense.title }
+                    if amountText.isEmpty { amountText = String(expense.amount) }
+                    if note.isEmpty { note = expense.note }
+                    if category.isEmpty { category = expense.category }
+                    if splitIds.isEmpty { splitIds = Set(expense.splitParticipantIds) }
+                    if payerId.isEmpty { payerId = expense.payerParticipantId }
+                }
                 // Mac dinh chia deu cho ca nhom: gan nhu luon la y muon, va bo
                 // chon nhanh hon la tich tay tung nguoi.
                 if splitIds.isEmpty { splitIds = Set(game.participants.map(\.id)) }
@@ -148,17 +175,20 @@ struct AddExpenseView: View {
         guard let client = auth.client, let amount else { return }
         busy = true
         defer { busy = false }
+        // Giu nguyen kind: sua mot khoan "income" khong duoc bien no thanh "expense".
+        let body = ExpenseInput(
+            kind: expense?.kind ?? "expense",
+            category: category,
+            title: title,
+            amount: amount,
+            note: note,
+            payerParticipantId: payerId,
+            splitParticipantIds: Array(splitIds)
+        )
         do {
-            let _: ApiClient.Ignored = try await client.post(
-                "/api/games/\(game.id)/expenses",
-                body: ExpenseInput(
-                    category: category,
-                    title: title,
-                    amount: amount,
-                    payerParticipantId: payerId,
-                    splitParticipantIds: Array(splitIds)
-                )
-            )
+            let _: ApiClient.Ignored = expense == nil
+                ? try await client.post("/api/games/\(game.id)/expenses", body: body)
+                : try await client.patch("/api/expenses/\(expense!.id)", body: body)
             onSaved()
             dismiss()
         } catch ApiError.unauthorized {
