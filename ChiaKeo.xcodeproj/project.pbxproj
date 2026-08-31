@@ -10,6 +10,7 @@
 		B1000004 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000014; };
 		B1000005 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015; };
 		B100000A /* GameExtrasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001A; };
+		B100000C /* SummaryText.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001C; };
 		B100000B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100001B; };
 		B1000006 /* GameDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000016; };
 		B1000007 /* AddExpenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000017; };
@@ -20,6 +21,8 @@
 		B2000003 /* DecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000013; };
 
 		B2000004 /* SmokeRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000014; };
+		B2000005 /* SummaryTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2000015; };
+		B2000015 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryTextTests.swift; sourceTree = "<group>"; };
 		B2000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmokeRenderTests.swift; sourceTree = "<group>"; };
 		B2000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogicTests.swift; sourceTree = "<group>"; };
 		B2000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiClientTests.swift; sourceTree = "<group>"; };
@@ -27,9 +30,9 @@
 		B2000019 /* ChiaKeoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChiaKeoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 
 		B2000020 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		B2000021 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B2000001, B2000002, B2000003, B2000004); runOnlyForDeploymentPostprocessing = 0; };
+		B2000021 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B2000001, B2000002, B2000003, B2000004, B2000005); runOnlyForDeploymentPostprocessing = 0; };
 
-		B2000031 /* ChiaKeoTests */ = {isa = PBXGroup; children = (B2000011, B2000012, B2000013, B2000014); path = ChiaKeoTests; sourceTree = "<group>"; };
+		B2000031 /* ChiaKeoTests */ = {isa = PBXGroup; children = (B2000011, B2000012, B2000013, B2000014, B2000015); path = ChiaKeoTests; sourceTree = "<group>"; };
 
 		B2000070 = {isa = PBXTargetDependency; target = B1000040; targetProxy = B2000071; };
 		B2000071 = {isa = PBXContainerItemProxy; containerPortal = B1000041; proxyType = 1; remoteGlobalIDString = B1000040; remoteInfo = ChiaKeo; };
@@ -69,6 +72,7 @@
 		B1000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B1000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		B1000015 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		B100001C = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryText.swift; sourceTree = "<group>"; };
 		B100001A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameExtrasView.swift; sourceTree = "<group>"; };
 		B100001B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B1000016 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDetailView.swift; sourceTree = "<group>"; };
@@ -77,11 +81,11 @@
 		B1000019 /* ChiaKeo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChiaKeo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 
 		B1000020 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
-		B1000021 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B1000001, B1000002, B1000003, B1000004, B1000005, B1000006, B1000007, B100000A, B100000B); runOnlyForDeploymentPostprocessing = 0; };
+		B1000021 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (B1000001, B1000002, B1000003, B1000004, B1000005, B1000006, B1000007, B100000A, B100000B, B100000C); runOnlyForDeploymentPostprocessing = 0; };
 		B1000022 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B1000008); runOnlyForDeploymentPostprocessing = 0; };
 
 		B1000030 = {isa = PBXGroup; children = (B1000031, B2000031, B1000032); sourceTree = "<group>"; };
-		B1000031 /* ChiaKeo */ = {isa = PBXGroup; children = (B1000011, B1000012, B1000013, B1000014, B1000015, B100001A, B100001B, B1000016, B1000017, B1000018); path = ChiaKeo; sourceTree = "<group>"; };
+		B1000031 /* ChiaKeo */ = {isa = PBXGroup; children = (B1000011, B1000012, B1000013, B1000014, B1000015, B100001A, B100001B, B100001C, B1000016, B1000017, B1000018); path = ChiaKeo; sourceTree = "<group>"; };
 		B1000032 /* Products */ = {isa = PBXGroup; children = (B1000019, B2000019); name = Products; sourceTree = "<group>"; };
 
 		B1000040 /* ChiaKeo */ = {

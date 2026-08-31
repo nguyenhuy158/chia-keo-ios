@@ -23,6 +23,7 @@ struct GameDetailView: View {
     @State private var adding = false
     @State private var addingPerson = false
     @State private var transferring = false
+    @State private var copied: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -46,9 +47,27 @@ struct GameDetailView: View {
                 }
             }
         }
+        .overlay(alignment: .bottom) {
+            if let copied {
+                Text(copied)
+                    .font(.footnote)
+                    .padding(.horizontal, 14).padding(.vertical, 9)
+                    .background(.thinMaterial, in: Capsule())
+                    .padding(.bottom, 20)
+                    .transition(.opacity)
+                    .task(id: copied) {
+                        try? await Task.sleep(nanoseconds: 1_600_000_000)
+                        self.copied = nil
+                    }
+            }
+        }
+        .animation(.default, value: copied)
         .navigationTitle(detail?.name ?? "Đang tải")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if let detail { CopyMenu(detail: detail) { copied = $0 } }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     if let detail, !detail.isClosed {
@@ -324,6 +343,50 @@ struct ContactPickerView: View {
             await done()
             dismiss()
         }
+    }
+}
+
+// MARK: - Copy
+
+/// Ban chieu cua src/components/CopyMenu.tsx. Bo phan anh PNG: iOS chua co
+/// renderer, va text la thu thuc su duoc dan vao Zalo.
+struct CopyMenu: View {
+    let detail: ApiGameDetail
+    let notify: (String) -> Void
+
+    private var shareUrl: String? {
+        guard let link = detail.shareLink, link.enabled else { return nil }
+        return "\(ApiClient.origin)/share/\(link.token)"
+    }
+
+    var body: some View {
+        Menu {
+            Button {
+                copy(buildSummaryText(detail, shareUrl: shareUrl), "Đã copy tổng kết")
+            } label: {
+                Label("Copy tổng kết", systemImage: "checklist")
+            }
+            Button {
+                copy(buildSummaryText(detail, variant: .detailed, shareUrl: shareUrl),
+                     "Đã copy tổng kết chi tiết")
+            } label: {
+                Label("Copy tổng kết chi tiết", systemImage: "arrow.left.arrow.right")
+            }
+            if let shareUrl {
+                Button {
+                    copy(shareUrl, "Đã copy link")
+                } label: {
+                    Label("Copy link xem", systemImage: "link")
+                }
+            }
+        } label: {
+            Label("Copy", systemImage: "doc.on.doc")
+        }
+    }
+
+    private func copy(_ text: String, _ message: String) {
+        UIPasteboard.general.string = text
+        notify(message)
     }
 }
 

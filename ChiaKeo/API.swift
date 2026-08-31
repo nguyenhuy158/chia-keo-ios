@@ -24,6 +24,11 @@ struct ApiParticipant: Decodable, Identifiable {
     let accountName: String
 }
 
+struct ApiExpenseSplit: Decodable {
+    let participantId: String
+    let amount: Int
+}
+
 struct ApiExpense: Decodable, Identifiable {
     let id: String
     let kind: String
@@ -34,6 +39,9 @@ struct ApiExpense: Decodable, Identifiable {
     let payerParticipantId: String
     let splitMode: String
     let splitParticipantIds: [String]
+    /// Phan chia thuc te cua tung nguoi. Optional vi payload cu (va vai test)
+    /// khong co field nay — Swift bo qua gia tri mac dinh khi decode.
+    let splits: [ApiExpenseSplit]?
     let createdAt: String
 }
 

@@ -338,16 +338,8 @@ struct GameOptionsView: View {
     }
 
     private func copyReport(_ detail: ApiGameDetail) {
-        var lines = ["\(detail.name) — tổng \(formatVnd(detail.summary.totalExpense))", ""]
-        for expense in detail.expenses {
-            lines.append("• \(expense.title): \(formatVnd(expense.amount)) (\(detail.name(of: expense.payerParticipantId)) ứng)")
-        }
-        lines.append("")
-        lines.append("Ai trả ai:")
-        for row in detail.summary.settlements {
-            lines.append("• \(detail.name(of: row.fromParticipantId)) → \(detail.name(of: row.toParticipantId)): \(formatVnd(row.amount))")
-        }
-        UIPasteboard.general.string = lines.joined(separator: "\n")
+        let link = detail.shareLink.flatMap { $0.enabled ? "\(ApiClient.origin)/share/\($0.token)" : nil }
+        UIPasteboard.general.string = buildSummaryText(detail, variant: .detailed, shareUrl: link)
     }
 }
 
