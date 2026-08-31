@@ -493,7 +493,42 @@ private struct ExpensesSection: View {
 private struct SummarySection: View {
     let detail: ApiGameDetail
 
+    @AppStorage(SummaryBackgroundStore.key) private var backgroundId = summaryBackgrounds[0].id
+    @State private var preview: UIImage?
+
+    private var shareUrl: String? {
+        guard let link = detail.shareLink, link.enabled else { return nil }
+        return "\(ApiClient.origin)/share/\(link.token)"
+    }
+
     var body: some View {
+        // Xem truoc dung anh se copy: thay gi o day thi dan ra dung the.
+        Section {
+            if let preview {
+                Image(uiImage: preview)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+            } else {
+                ProgressView().frame(maxWidth: .infinity)
+            }
+            Picker("Nền ảnh", selection: $backgroundId) {
+                ForEach(summaryBackgrounds) { Text($0.label).tag($0.id) }
+            }
+        } header: {
+            Text("Ảnh tổng kết")
+        } footer: {
+            Text("Đúng nội dung của “Copy ảnh” trên thanh trên.")
+        }
+        // Doi nen hoac doi so lieu la ve lai; thieu detail trong id thi anh dung o
+        // ban cu sau khi them mot khoan chi.
+        .task(id: "\(backgroundId)|\(detail.expenses.count)|\(detail.summary.totalExpense)|\(detail.participants.count)") {
+            preview = renderSummaryImage(detail, shareUrl: shareUrl,
+                                         background: summaryBackground(backgroundId))
+        }
+
         Section("Ai trả ai") {
             if detail.summary.settlements.isEmpty {
                 Text("Không ai phải chuyển tiền.").font(.footnote).foregroundStyle(.secondary)
