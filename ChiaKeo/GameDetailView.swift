@@ -357,11 +357,6 @@ struct CopyMenu: View {
 
     @AppStorage(SummaryBackgroundStore.key) private var backgroundId = summaryBackgrounds[0].id
 
-    private var shareUrl: String? {
-        guard let link = detail.shareLink, link.enabled else { return nil }
-        return "\(ApiClient.origin)/share/\(link.token)"
-    }
-
     var body: some View {
         Menu {
             Picker("Nền ảnh", selection: $backgroundId) {
@@ -369,12 +364,12 @@ struct CopyMenu: View {
             }
 
             Button {
-                copy(buildSummaryText(detail, shareUrl: shareUrl), "Đã copy tổng kết")
+                copy(buildSummaryText(detail, shareUrl: detail.shareUrl), "Đã copy tổng kết")
             } label: {
                 Label("Copy tổng kết", systemImage: "checklist")
             }
             Button {
-                copy(buildSummaryText(detail, variant: .detailed, shareUrl: shareUrl),
+                copy(buildSummaryText(detail, variant: .detailed, shareUrl: detail.shareUrl),
                      "Đã copy tổng kết chi tiết")
             } label: {
                 Label("Copy tổng kết chi tiết", systemImage: "arrow.left.arrow.right")
@@ -388,7 +383,7 @@ struct CopyMenu: View {
             Button { saveImage() } label: {
                 Label("Lưu ảnh về máy", systemImage: "square.and.arrow.down")
             }
-            if let shareUrl {
+            if let shareUrl = detail.shareUrl {
                 Button { copy(shareUrl, "Đã copy link") } label: {
                     Label("Copy link xem", systemImage: "link")
                 }
@@ -404,7 +399,7 @@ struct CopyMenu: View {
     }
 
     private func image(_ variant: SummaryVariant) -> UIImage? {
-        renderSummaryImage(detail, variant: variant, shareUrl: shareUrl,
+        renderSummaryImage(detail, variant: variant, shareUrl: detail.shareUrl,
                            background: summaryBackground(backgroundId))
     }
 
@@ -496,11 +491,6 @@ private struct SummarySection: View {
     @AppStorage(SummaryBackgroundStore.key) private var backgroundId = summaryBackgrounds[0].id
     @State private var preview: UIImage?
 
-    private var shareUrl: String? {
-        guard let link = detail.shareLink, link.enabled else { return nil }
-        return "\(ApiClient.origin)/share/\(link.token)"
-    }
-
     var body: some View {
         // Xem truoc dung anh se copy: thay gi o day thi dan ra dung the.
         Section {
@@ -525,7 +515,7 @@ private struct SummarySection: View {
         // Doi nen hoac doi so lieu la ve lai; thieu detail trong id thi anh dung o
         // ban cu sau khi them mot khoan chi.
         .task(id: "\(backgroundId)|\(detail.expenses.count)|\(detail.summary.totalExpense)|\(detail.participants.count)") {
-            preview = renderSummaryImage(detail, shareUrl: shareUrl,
+            preview = renderSummaryImage(detail, shareUrl: detail.shareUrl,
                                          background: summaryBackground(backgroundId))
         }
 

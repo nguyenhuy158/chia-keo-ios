@@ -41,6 +41,7 @@ final class DecodingTests: XCTestCase {
         XCTAssertEqual(detail.summary.settlements.first?.id, "p2-p1-60000")
         XCTAssertEqual(detail.collaborators.first?.id, "a@b.c")   // userId nil thi lay email
         XCTAssertTrue(detail.shareLink?.enabled ?? false)
+        XCTAssertEqual(detail.shareUrl, "\(ApiClient.origin)/share/t")
     }
 
     func testGameDetailOpenGame() throws {
@@ -52,6 +53,7 @@ final class DecodingTests: XCTestCase {
         """)
         XCTAssertFalse(detail.isClosed)
         XCTAssertNil(detail.shareLink)
+        XCTAssertNil(detail.shareUrl)
     }
 
     /// Hoi quy: `id` cua ApiContact phai la `key`. Truoc day lay id trong DB

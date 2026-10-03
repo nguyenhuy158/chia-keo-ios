@@ -182,7 +182,7 @@ struct GameOptionsView: View {
                         Toggle("Bật link xem", isOn: .constant(link.enabled))
                             .disabled(true)
                         Button {
-                            UIPasteboard.general.string = "\(ApiClient.origin)/share/\(link.token)"
+                            UIPasteboard.general.string = link.url
                         } label: {
                             Label("Copy link xem", systemImage: "doc.on.doc")
                         }
@@ -338,8 +338,7 @@ struct GameOptionsView: View {
     }
 
     private func copyReport(_ detail: ApiGameDetail) {
-        let link = detail.shareLink.flatMap { $0.enabled ? "\(ApiClient.origin)/share/\($0.token)" : nil }
-        UIPasteboard.general.string = buildSummaryText(detail, variant: .detailed, shareUrl: link)
+        UIPasteboard.general.string = buildSummaryText(detail, variant: .detailed, shareUrl: detail.shareUrl)
     }
 }
 

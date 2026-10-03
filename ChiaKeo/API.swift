@@ -86,6 +86,9 @@ struct PhotoInput: Encodable {
 struct ApiShareLink: Decodable {
     let token: String
     let enabled: Bool
+
+    /// Trang xem cong khai cua cuoc chia, khop route /share/:token ben web.
+    var url: String { "\(ApiClient.origin)/share/\(token)" }
 }
 
 struct ApiCollaborator: Decodable, Identifiable {
@@ -118,6 +121,9 @@ struct ApiGameDetail: Decodable {
     let collaborators: [ApiCollaborator]
 
     var isClosed: Bool { closedAt != nil }
+
+    /// Link chia se dang bat, nil neu chua tao hoac da tat.
+    var shareUrl: String? { shareLink.flatMap { $0.enabled ? $0.url : nil } }
 
     func name(of participantId: String) -> String {
         participants.first { $0.id == participantId }?.name ?? "?"
