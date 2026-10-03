@@ -146,13 +146,13 @@ struct AddExpenseView: View {
     }
 
     private func scan(_ image: UIImage) async {
-        guard let client = auth.client, let jpeg = jpegBase64(image) else {
+        guard let jpeg = jpegBase64(image) else {
             error = "Không đọc được ảnh"
             return
         }
         busy = true
         defer { busy = false }
-        do {
+        error = await auth.perform { client in
             let response: AiSuggestionResponse = try await client.post(
                 "/api/ai/receipt",
                 body: ReceiptInput(gameId: game.id, image: .init(data: jpeg))
@@ -163,16 +163,11 @@ struct AddExpenseView: View {
             if suggestion.amount > 0 { amountText = String(suggestion.amount) }
             if !suggestion.payerParticipantId.isEmpty { payerId = suggestion.payerParticipantId }
             if !suggestion.splitParticipantIds.isEmpty { splitIds = Set(suggestion.splitParticipantIds) }
-            error = nil
-        } catch ApiError.unauthorized {
-            auth.signOut(notice: "Phiên đã hết hạn, đăng nhập lại nhé.")
-        } catch {
-            self.error = error.localizedDescription
         }
     }
 
     private func save() async {
-        guard let client = auth.client, let amount else { return }
+        guard let amount else { return }
         busy = true
         defer { busy = false }
         // Giu nguyen kind: sua mot khoan "income" khong duoc bien no thanh "expense".
@@ -185,16 +180,17 @@ struct AddExpenseView: View {
             payerParticipantId: payerId,
             splitParticipantIds: Array(splitIds)
         )
-        do {
+        // 401 thi perform da dang xuat: chi dong form khi ghi that su thanh cong.
+        var saved = false
+        error = await auth.perform { client in
             let _: ApiClient.Ignored = expense == nil
                 ? try await client.post("/api/games/\(game.id)/expenses", body: body)
                 : try await client.patch("/api/expenses/\(expense!.id)", body: body)
+            saved = true
+        }
+        if saved {
             onSaved()
             dismiss()
-        } catch ApiError.unauthorized {
-            auth.signOut(notice: "Phiên đã hết hạn, đăng nhập lại nhé.")
-        } catch {
-            self.error = error.localizedDescription
         }
     }
 }
