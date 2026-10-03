@@ -110,6 +110,14 @@ subjects without diacritics, e.g. `feat: sua khoan chi`, `ci: chay test tren
 GitHub Actions`. Pull requests should include a short summary, `xcodebuild test`
 results, and simulator screenshots for visible UI changes.
 
+## Ecosystem
+
+See the [huyab.click ecosystem map](https://github.com/nguyenhuy158/kit/blob/main/docs/ECOSYSTEM.md) for how all personal repos connect.
+
+- Kit packages: none (Swift, zero dependencies; kit is pnpm-only).
+- Talks to: `chia-keo` API at https://chiakeo.huyab.click (`huyab_sso` cookie /
+  `Authorization: Bearer`), `sso` at https://auth.huyab.click for WebView login.
+
 ## Agent-Specific Instructions
 
 Keep responses short and focused. If a requirement is unclear, ask before making
