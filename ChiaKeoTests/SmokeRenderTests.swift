@@ -14,7 +14,7 @@ final class RouterProtocol: URLProtocol {
     nonisolated(unsafe) static var seenPaths: [String] = []
 
     override class func canInit(with request: URLRequest) -> Bool {
-        request.url?.host == "chiakeo.huyab.click"
+        request.url?.host == "chiakeo.huyab.cfd"
     }
 
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }

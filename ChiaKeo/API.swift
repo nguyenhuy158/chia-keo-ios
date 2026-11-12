@@ -407,7 +407,7 @@ enum ApiError: LocalizedError {
 }
 
 struct ApiClient {
-    static let origin = "https://chiakeo.huyab.click"
+    static let origin = "https://chiakeo.huyab.cfd"
 
     let token: String
     /// Test tiem URLSession co URLProtocol gia vao day; app dung shared.
