@@ -8,12 +8,12 @@ Tạo cuộc chia, collaborator, album ảnh, settings → vẫn làm trên web.
 
 ## Đăng nhập
 
-Dùng chung SSO `auth.huyab.click` với web, **cùng một account, cùng `userId`** —
+Dùng chung SSO `auth.huyab.cfd` với web, **cùng một account, cùng `userId`** —
 không có tài khoản riêng cho app.
 
-SSO chỉ nhận `redirect_uri` là https trong `huyab.click`, không nhận custom
+SSO chỉ nhận `redirect_uri` là https trong `huyab.cfd`, không nhận custom
 scheme, nên `ASWebAuthenticationSession` không dùng được. Thay vào đó app mở
-`WKWebView` tới `/login?redirect_uri=https://chiakeo.huyab.click/`; khi webview
+`WKWebView` tới `/login?redirect_uri=https://chiakeo.huyab.cfd/`; khi webview
 về tới domain đó, `WKHTTPCookieStore` đọc cookie `huyab_sso` — native API này
 đọc được cả HttpOnly, đúng chỗ JavaScript không với tới. JWT vào Keychain, từ đó
 gọi API bằng `Authorization: Bearer`.

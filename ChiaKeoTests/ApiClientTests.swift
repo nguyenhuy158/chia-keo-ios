@@ -78,7 +78,7 @@ final class ApiClientTests: XCTestCase {
         XCTAssertEqual(stock.stock, 7)
         XCTAssertEqual(StubProtocol.lastRequest?.httpMethod, "GET")
         XCTAssertEqual(StubProtocol.lastRequest?.url?.absoluteString,
-                       "https://chiakeo.huyab.click/api/shuttles")
+                       "https://chiakeo.huyab.cfd/api/shuttles")
         XCTAssertEqual(StubProtocol.lastRequest?.value(forHTTPHeaderField: "Authorization"),
                        "Bearer tok")
     }

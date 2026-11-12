@@ -13,17 +13,17 @@ target plus one XCTest target, and the same `Auth.swift` / `API.swift` /
 `LoginView.swift` / `make-ipa.sh` layout.
 
 - **Auth** (`Auth.swift`, `LoginView.swift`): the shared SSO at
-  `auth.huyab.click` only accepts https `redirect_uri` values inside
-  `huyab.click`, so `ASWebAuthenticationSession` with a custom scheme cannot be
+  `auth.huyab.cfd` only accepts https `redirect_uri` values inside
+  `huyab.cfd`, so `ASWebAuthenticationSession` with a custom scheme cannot be
   used. `LoginView` opens a `WKWebView`; once it lands back on
-  `chiakeo.huyab.click`, `WKHTTPCookieStore` reads the HttpOnly `huyab_sso`
+  `chiakeo.huyab.cfd`, `WKHTTPCookieStore` reads the HttpOnly `huyab_sso`
   cookie and the JWT is stored in the Keychain. `SsoToken` never verifies the
   signature (the server does); it only reads `exp` to know when to stop calling
   the API.
 - **API** (`API.swift`): DTOs are a projection of `shared/api-types.ts` in
   `../chia-keo`. Declare only fields the app actually uses — Codable ignores
   unknown keys, so new server fields never break the app. `ApiClient` targets
-  `https://chiakeo.huyab.click` and authenticates with `Authorization: Bearer
+  `https://chiakeo.huyab.cfd` and authenticates with `Authorization: Bearer
   <jwt>` (the chia-keo worker's `readSsoToken` accepts Bearer as well as the
   cookie). Tests inject a `URLSession` with a fake `URLProtocol`; the app uses
   `URLSession.shared`.
@@ -34,7 +34,7 @@ Folder structure:
 ChiaKeo/                    # App target sources (SwiftUI, iOS 16+)
   ChiaKeoApp.swift          #   `@main` app entry; `AuthStore` switches `LoginView` / `RootTabs`
   Auth.swift                #   `SsoToken` (reads JWT `exp` only), `Keychain`, `SsoCookie`, `AuthStore`
-  LoginView.swift           #   WKWebView SSO login via auth.huyab.click
+  LoginView.swift           #   WKWebView SSO login via auth.huyab.cfd
   API.swift                 #   Decodable DTOs + `ApiClient` (URLSession, Bearer auth)
   HomeView.swift            #   `RootTabs`, game list, transfers
   GameDetailView.swift      #   Game detail, participant form, contact picker, copy menu
@@ -112,11 +112,11 @@ results, and simulator screenshots for visible UI changes.
 
 ## Ecosystem
 
-See the [huyab.click ecosystem map](https://github.com/nguyenhuy158/kit/blob/main/docs/ECOSYSTEM.md) for how all personal repos connect.
+See the [huyab.cfd ecosystem map](https://github.com/nguyenhuy158/kit/blob/main/docs/ECOSYSTEM.md) for how all personal repos connect.
 
 - Kit packages: none (Swift, zero dependencies; kit is pnpm-only).
-- Talks to: `chia-keo` API at https://chiakeo.huyab.click (`huyab_sso` cookie /
-  `Authorization: Bearer`), `sso` at https://auth.huyab.click for WebView login.
+- Talks to: `chia-keo` API at https://chiakeo.huyab.cfd (`huyab_sso` cookie /
+  `Authorization: Bearer`), `sso` at https://auth.huyab.cfd for WebView login.
 
 ## Agent-Specific Instructions
 
